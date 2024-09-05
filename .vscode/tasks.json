@@ -1,0 +1,44 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Make Debug in Background",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "debug"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "C:/cygwin64/bin/bash.exe",
+          "args": ["-c"]
+        }
+      },
+      "isBackground": true,
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Run 'make debug' in the workspace directory"
+    },
+    {
+      "label": "Terminate Make Debug Task",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "clean"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "C:/cygwin64/bin/bash.exe",
+          "args": ["-c"]
+        }
+      },
+      "problemMatcher": [],
+      "detail": "Terminate the background 'make debug' process"
+    }
+  ]
+}
