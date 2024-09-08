@@ -3,8 +3,8 @@
 USER = hungnp
 ADDRESS = 192.168.1.17
 SHAREPOINT_ADDRESS = 192.168.1.8
-SHAREPOINT = /app
-MOUNTPOINT = /mnt/app
+SHAREPOINT = /app2
+MOUNTPOINT = /mnt/app2
 APP = main.py
 DEBUG_PORT = 5678
 PUBLIC_PORT = 8000
@@ -23,7 +23,7 @@ removeDependencies:
 	ssh $(USER)@$(ADDRESS) "cd $(MOUNTPOINT)/ && sudo ./removeDependencies.sh"
 
 debug:
-	ssh -L $(DEBUG_PORT):localhost:$(DEBUG_PORT) -L $(PUBLIC_PORT):localhost:$(PUBLIC_PORT) $(USER)@$(ADDRESS) "DISPLAY=:10 python $(MOUNTPOINT)/$(APP) --debug" || true
+	ssh -L $(DEBUG_PORT):localhost:$(DEBUG_PORT) -L $(PUBLIC_PORT):localhost:$(PUBLIC_PORT) $(USER)@$(ADDRESS) "sudo DISPLAY=:10 python $(MOUNTPOINT)/$(APP) --debug" || true
 
 manualProfiling:
 	# TODO

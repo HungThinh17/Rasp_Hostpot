@@ -6,16 +6,42 @@ def run_command(command):
     try:
         subprocess.run(command, shell=True, check=True)
     except subprocess.CalledProcessError as e:
-        print(f"Error occurred: {e}")
+        print(f"Error occurred while running command '{command}': {e}")
 
-def install_dependencies():
-    """Step 1: Install necessary packages."""
-    print("Installing necessary packages...")
-    run_command("sudo apt update")
-    run_command("sudo apt install hostapd dnsmasq iptables-persistent -y")
-    run_command("sudo systemctl unmask hostapd")
-    run_command("sudo systemctl enable hostapd")
-    print("Packages installed.")
+def check_setup_completed():
+    """Check if the setup has already been completed."""
+    return os.path.exists('/etc/hostapd/hostapd.conf')
+
+def rollback_setup():
+    """Rollback the setup by restoring original configurations."""
+    print("Rolling back the setup...")
+    if os.path.exists('/etc/dnsmasq.conf.orig'):
+        run_command("sudo mv /etc/dnsmasq.conf.orig /etc/dnsmasq.conf")
+    if os.path.exists('/etc/hostapd/hostapd.conf'):
+        os.remove('/etc/hostapd/hostapd.conf')
+    if os.path.exists('/etc/default/hostapd'):
+        with open('/etc/default/hostapd', 'r') as f:
+            lines = f.readlines()
+        with open('/etc/default/hostapd', 'w') as f:
+            for line in lines:
+                if 'DAEMON_CONF' not in line:
+                    f.write(line)
+    run_command("sudo systemctl restart dnsmasq")
+    run_command("sudo systemctl restart hostapd")
+    print("Rollback completed.")
+
+def clean_setup():
+    """Clean the setup by removing configurations."""
+    print("Cleaning up previous configurations...")
+    if os.path.exists('/etc/dnsmasq.conf'):
+        os.remove('/etc/dnsmasq.conf')
+    if os.path.exists('/etc/hostapd/hostapd.conf'):
+        os.remove('/etc/hostapd/hostapd.conf')
+    if os.path.exists('/etc/wpa_supplicant/wpa_supplicant.conf'):
+        os.remove('/etc/wpa_supplicant/wpa_supplicant.conf')
+    run_command("sudo systemctl stop dnsmasq")
+    run_command("sudo systemctl stop hostapd")
+    print("Clean setup completed.")
 
 def configure_static_ip():
     """Step 2: Configure static IP for wlan0."""
@@ -75,7 +101,6 @@ def enable_ip_forwarding():
     """Step 6: Enable IP forwarding and NAT."""
     print("Enabling IP forwarding...")
     run_command("sudo sysctl -w net.ipv4.ip_forward=1")
-    
     # Persist the IP forwarding setting
     with open('/etc/sysctl.conf', 'r') as file:
         data = file.readlines()
@@ -85,7 +110,6 @@ def enable_ip_forwarding():
             break
     with open('/etc/sysctl.conf', 'w') as file:
         file.writelines(data)
-    
     # Set up NAT (Network Address Translation)
     run_command("sudo iptables -t nat -A POSTROUTING -o wlan1 -j MASQUERADE")
     run_command("sudo iptables-save > /etc/iptables/rules.v4")
@@ -93,11 +117,18 @@ def enable_ip_forwarding():
 
 def setup_hotspot(ssid, passphrase, wifi_ssid, wifi_password):
     """Main function to run all setup steps."""
-    install_dependencies()
-    configure_static_ip()
-    configure_dnsmasq()
-    configure_hostapd(ssid, passphrase)
-    configure_wpa_supplicant(wifi_ssid, wifi_password)
-    enable_ip_forwarding()
-    print("Raspberry Pi hotspot setup complete. You can now connect devices.")
+    if check_setup_completed():
+        print("Setup has already been completed. Rolling back to clean state.")
+        rollback_setup()
+        clean_setup()
 
+    try:
+        configure_static_ip()
+        configure_dnsmasq()
+        configure_hostapd(ssid, passphrase)
+        configure_wpa_supplicant(wifi_ssid, wifi_password)
+        enable_ip_forwarding()
+        print("Raspberry Pi hotspot setup complete. You can now connect devices.")
+    except Exception as e:
+        print(f"An error occurred during the hotspot setup: {e}")
+        rollback_setup()

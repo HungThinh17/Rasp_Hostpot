@@ -15,7 +15,7 @@
             "pathMappings": [
                 {
                     "localRoot": "${workspaceFolder}/app",
-                    "remoteRoot": "/mnt/app"
+                    "remoteRoot": "/mnt/app2"
                 }
             ],
             "preLaunchTask": "Make Debug in Background",

@@ -1,0 +1,5 @@
+python3-subprocess
+hostapd
+dnsmasq
+iptables-persistent
+lighttpd
