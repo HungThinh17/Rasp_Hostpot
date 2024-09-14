@@ -35,7 +35,7 @@ if __name__ == "__main__":
     wifi_password = "123321123"
 
     setup_hotspot(hotspot_ssid, hotspot_passphrase, wifi_ssid, wifi_password)
-    setup_portal()
+    # setup_portal()
 
     print("Setup completed successfully.")
     while True:

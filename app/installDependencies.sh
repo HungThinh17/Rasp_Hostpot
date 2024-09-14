@@ -32,7 +32,7 @@ install_packages() {
 setup_venv
 
 # system level packages
-xargs sudo apt-get -y install < requiredPackage.txt
+xargs sudo apt-get -y install < requirementAptPackages.txt
 
 # python app dependencies
-install_packages "requirements.txt" "pip" "pip install --break-system-packages"
+install_packages "requirementPipPackages.txt" "pip" "pip install --break-system-packages"
